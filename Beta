@@ -230,12 +230,18 @@ button.MouseButton1Click:Connect(function()
 		end
 	elseif inputName == "me" then
 		remote:FireServer(false, totalCash, "Cash", LocalPlayer)
-	elseif inputName == "others" then
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr ~= LocalPlayer then
+	elseif inputName ~= nil then
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer then
+			local nameLower = plr.Name:lower()
+			local displayNameLower = plr.DisplayName:lower()
+			local inputLower = inputName:lower()
+
+			if nameLower:find(inputLower, 1, true) or displayNameLower:find(inputLower, 1, true) then
 				remote:FireServer(false, totalCash, "Cash", plr)
 			end
 		end
+	end
 	elseif inputName == "friends" then
 		for _, plr in ipairs(Players:GetPlayers()) do
 			if plr ~= LocalPlayer and LocalPlayer:IsFriendsWith(plr.UserId) then
