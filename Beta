@@ -1,0 +1,296 @@
+local StarterGui = game:GetService("StarterGui")
+local MarketplaceService = game:GetService("MarketplaceService")
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Optional: create a dummy frame just to parent the sound to (not shown)
+local frame = Instance.new("Frame")
+frame.Visible = false
+frame.Parent = playerGui
+
+-- Create and play the sound
+local sound = Instance.new("Sound", frame)
+sound.SoundId = "rbxassetid://8486683243"
+sound.Volume = 1
+sound:Play()
+
+-- Get Place ID
+local placeId = game.PlaceId
+
+-- Get game info (name, etc.)
+local success, info = pcall(function()
+	return MarketplaceService:GetProductInfo(placeId)
+end)
+
+-- Show notification
+if success then
+	StarterGui:SetCore("SendNotification", {
+		Title = "Beta Hub",
+		Text = "Game: " .. info.Name,
+		Duration = 8
+	})
+else
+	warn("Failed to get game info:", info)
+end
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui", game.CoreGui)
+screenGui.Name = "BetaHubGUI"
+screenGui.ResetOnSpawn = false
+
+--// LOADING SCREEN
+local loadingFrame = Instance.new("Frame", screenGui)
+loadingFrame.Size = UDim2.new(0.4, 0, 0.2, 0)
+loadingFrame.Position = UDim2.new(0.3, 0, 0.4, 0)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+loadingFrame.BorderSizePixel = 0
+loadingFrame.Active = true
+loadingFrame.Draggable = true
+Instance.new("UICorner", loadingFrame)
+
+local gradient = Instance.new("UIGradient", loadingFrame)
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 50, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 100, 255))
+}
+gradient.Rotation = 45
+
+local loadingLabel = Instance.new("TextLabel", loadingFrame)
+loadingLabel.Text = "🚀 Loading Beta Hub..."
+loadingLabel.Size = UDim2.new(1, 0, 0.4, 0)
+loadingLabel.BackgroundTransparency = 1
+loadingLabel.TextColor3 = Color3.new(1, 1, 1)
+loadingLabel.Font = Enum.Font.GothamBold
+loadingLabel.TextScaled = true
+
+local percentText = Instance.new("TextLabel", loadingFrame)
+percentText.Size = UDim2.new(1, -20, 0.2, 0)
+percentText.Position = UDim2.new(0, 10, 0.4, 0)
+percentText.BackgroundTransparency = 1
+percentText.TextColor3 = Color3.fromRGB(0, 255, 255)
+percentText.Font = Enum.Font.Gotham
+percentText.TextSize = 20
+percentText.TextXAlignment = Enum.TextXAlignment.Right
+percentText.Text = "0%"
+
+local progressBarBack = Instance.new("Frame", loadingFrame)
+progressBarBack.Size = UDim2.new(0.9, 0, 0.2, 0)
+progressBarBack.Position = UDim2.new(0.05, 0, 0.7, 0)
+progressBarBack.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+Instance.new("UICorner", progressBarBack)
+
+local progressBar = Instance.new("Frame", progressBarBack)
+progressBar.Size = UDim2.new(0, 0, 1, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+Instance.new("UICorner", progressBar)
+
+for i = 1, 100 do
+	progressBar.Size = UDim2.new(i / 100, 0, 1, 0)
+	percentText.Text = i .. "%"
+	RunService.RenderStepped:Wait()
+end
+loadingFrame:Destroy()
+
+--// MAIN GUI FRAME
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 320, 0, 300)
+frame.Position = UDim2.new(0.3, 0, 0.25, 0)
+frame.BackgroundColor3 = Color3.fromRGB(35, 30, 45)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+-- TOGGLE BUTTON
+local toggleButton = Instance.new("TextButton", screenGui)
+toggleButton.Text = "🛡️ Beta"
+toggleButton.Size = UDim2.new(0, 60, 0, 60)
+toggleButton.Position = UDim2.new(0.02, 0, 0.3, 0)
+toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextScaled = true
+toggleButton.AutoButtonColor = false
+toggleButton.Draggable = true
+Instance.new("UICorner", toggleButton)
+
+task.spawn(function()
+	while true do
+		toggleButton.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+		RunService.RenderStepped:Wait()
+	end
+end)
+
+toggleButton.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+end)
+
+-- SHORTCUT FRAME
+local shortcutsFrame = Instance.new("Frame")
+shortcutsFrame.Size = UDim2.new(0, 120, 0, 300)
+shortcutsFrame.Position = UDim2.new(0, -125, 0, 0)
+shortcutsFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+shortcutsFrame.BackgroundTransparency = 1
+shortcutsFrame.Parent = frame
+Instance.new("UICorner", shortcutsFrame)
+
+TweenService:Create(frame, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
+TweenService:Create(shortcutsFrame, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
+
+-- TITLE
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -100, 0, 30)
+title.Position = UDim2.new(0, 10, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "Beta Hub"
+title.Font = Enum.Font.JosefinSans
+title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+-- CONTROL BUTTONS
+local function createTopButton(text, pos, bgColor)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 25, 0, 25)
+	btn.Position = pos
+	btn.Text = text
+	btn.Font = Enum.Font.JosefinSans
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.BackgroundColor3 = bgColor
+	btn.TextScaled = true
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+	btn.Parent = frame
+	return btn
+end
+
+-- INPUT + LOGIC
+local elements = {}
+
+local function createTextBox(placeholder, yPosition)
+	local box = Instance.new("TextBox")
+	box.PlaceholderText = placeholder
+	box.Size = UDim2.new(0.9, 0, 0, 35)
+	box.Position = UDim2.new(0.05, 0, yPosition, 0)
+	box.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+	box.TextColor3 = Color3.fromRGB(0, 0, 0)
+	box.TextSize = 16
+	box.Font = Enum.Font.JosefinSans
+	box.Text = ""
+	box.ClearTextOnFocus = false
+	box.TextScaled = true
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
+	box.Parent = frame
+	table.insert(elements, box)
+	return box
+end
+
+local playerNameBox = createTextBox("Player name (me/all/others/friends/random)", 0.15)
+local cashBox = createTextBox("Cash Amount", 0.32)
+local multiplierBox = createTextBox("Multiplier (default: 1)", 0.49)
+
+local button = Instance.new("TextButton")
+button.Text = "Give Cash"
+button.Size = UDim2.new(0.9, 0, 0, 45)
+button.Position = UDim2.new(0.05, 0, 0.7, 0)
+button.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Font = Enum.Font.JosefinSans
+button.TextScaled = true
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+button.Parent = frame
+table.insert(elements, button)
+
+-- Sound
+local sound = Instance.new("Sound", frame)
+sound.SoundId = "rbxassetid://3020841054"
+
+-- Button logic
+button.MouseButton1Click:Connect(function()
+	if not button.Visible then return end
+	sound:Play()
+
+	local inputName = playerNameBox.Text
+	local cashAmount = tonumber(cashBox.Text)
+	local multiplier = tonumber(multiplierBox.Text) or 1
+	if inputName == "" or not cashAmount then return end
+
+	local totalCash = cashAmount * multiplier
+	local remote = ReplicatedStorage:FindFirstChild("MoneyRequest")
+	if not remote then warn("Remote not found") return end
+
+	if inputName == "all" then
+		for _, plr in ipairs(Players:GetPlayers()) do
+			remote:FireServer(false, totalCash, "Cash", plr)
+		end
+	elseif inputName == "me" then
+		remote:FireServer(false, totalCash, "Cash", LocalPlayer)
+	elseif inputName == "others" then
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if plr ~= LocalPlayer then
+				remote:FireServer(false, totalCash, "Cash", plr)
+			end
+		end
+	elseif inputName == "friends" then
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if plr ~= LocalPlayer and LocalPlayer:IsFriendsWith(plr.UserId) then
+				remote:FireServer(false, totalCash, "Cash", plr)
+			end
+		end
+	elseif inputName == "random" then
+		local others = {}
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if plr ~= LocalPlayer then table.insert(others, plr) end
+		end
+		if #others > 0 then
+			local randomPlayer = others[math.random(1, #others)]
+			remote:FireServer(false, totalCash, "Cash", randomPlayer)
+		end
+	else
+		local target = Players:FindFirstChild(inputName)
+		if target then
+			remote:FireServer(false, totalCash, "Cash", target)
+		end
+	end
+end)
+
+
+-- SHORTCUTS
+local shortcutLabel = Instance.new("TextLabel")
+shortcutLabel.Text = "Shortcuts"
+shortcutLabel.Size = UDim2.new(1, 0, 0, 35)
+shortcutLabel.Position = UDim2.new(0, 0, 0, 5)
+shortcutLabel.BackgroundTransparency = 1
+shortcutLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+shortcutLabel.TextScaled = true
+shortcutLabel.Font = Enum.Font.JosefinSans
+shortcutLabel.Parent = shortcutsFrame
+
+local function createShortcut(name, positionY, loadScript)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0.9, 0, 0, 35)
+	button.Position = UDim2.new(0.05, 0, 0, positionY)
+	button.Text = name
+	button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.Font = Enum.Font.JosefinSans
+	button.TextScaled = true
+	button.Parent = shortcutsFrame
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+
+	button.MouseButton1Click:Connect(function()
+		loadstring(game:HttpGet(loadScript))()
+	end)
+end
+
+createShortcut("Infinite Yield", 45, "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source")
+createShortcut("Nameless Admin", 90, "https://rawscripts.net/raw/Universal-Script-nameless-admin-15646")
+createShortcut("Dex Explorer", 135, "https://pastebin.com/raw/fPP8bZ8Z")
+createShortcut("Local Music Player", 180, "https://raw.githubusercontent.com/iamcheese-man/Local-Music-Player/refs/heads/main/MainScript")
+createShortcut("Remote Spy", 225, "https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpySource.lua")
+createShortcut("Trail", 270, "https://pastebin.com/raw/y7AfSRkP")
