@@ -262,7 +262,7 @@ end)
 
 -- SHORTCUTS
 local shortcutLabel = Instance.new("TextLabel")
-shortcutLabel.Text = "Shortcuts"
+shortcutLabel.Text = "🦾"
 shortcutLabel.Size = UDim2.new(1, 0, 0, 30)
 shortcutLabel.Position = UDim2.new(0, 0, 0, 5)
 shortcutLabel.BackgroundTransparency = 1
